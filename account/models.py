@@ -43,3 +43,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
+    def generate_activation_code(self):
+        from django.utils.crypto import get_random_string
+        
