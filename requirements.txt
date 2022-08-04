@@ -5,3 +5,4 @@ gunicorn
 djangorestframework-simplejwt
 pillow
 drf-yasg
+python-decouple
