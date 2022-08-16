@@ -17,8 +17,9 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     desc = models.TextField()
     image = models.ImageField(upload_to = 'products', blank= True, null=True)
-
-    def get_avarage_rating(self):
+    
+    @property
+    def avarage_rating(self):
         ratings = [rating.value for rating in self.ratings.all()]
         if ratings:
             return sum(ratings)/len(ratings)

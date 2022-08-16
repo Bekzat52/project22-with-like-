@@ -12,7 +12,7 @@ class ProductSerializer(serializers.ModelSerializer):
         rep = super().to_representation(instance)
         rep["comments"] = CommentSerializer(instance.comments.all(), many=True).data
         rep["likes"] = instance.likes.all().count()
-        rep["rating"] = instance.get_avarage_rating()
+        rep["rating"] = instance.avarage_rating
         rep['liked_by_user'] = False
         rep['user_rating'] = 0
 

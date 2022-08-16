@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework import mixins
+from rest_framework import mixins, filters
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
+from rest_framework import generics
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -15,6 +16,8 @@ class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['title', 'price']
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -22,6 +25,7 @@ class ProductViewSet(ModelViewSet):
         return context
     
     @swagger_auto_schema(manual_parameters=[openapi.Parameter('title', openapi.IN_QUERY, 'search product by title', type=openapi.TYPE_STRING)])
+
     @action(methods=['GET'], detail=False)
     def search(self, request):
         title = request.query_params.get('title')
@@ -32,7 +36,15 @@ class ProductViewSet(ModelViewSet):
         serializer = ProductSerializer(queryset, many=True, context={'request':request})
         return Response(serializer.data, 200)
 
+    @action(methods=['GET'], detail=False)
+    def order_by_rating(self, request):
+        queryset = self.get_queryset()
 
+        queryset = sorted(queryset, key=lambda product:product.avarage_rating, reverse=True)
+        serializer = ProductSerializer(queryset, many=True, context={'request':request})
+        return Response(serializer.data, 200)
+
+        
 class CategoryViewSet(mixins.CreateModelMixin, 
                      mixins.DestroyModelMixin, 
                      mixins.ListModelMixin, 
@@ -49,6 +61,9 @@ class CommentViewSet(mixins.CreateModelMixin,
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
+
+class CommentGenericViewSet(generics.RetrieveUpdateDestroyAPIView):
+    
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
